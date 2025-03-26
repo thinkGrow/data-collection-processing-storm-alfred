@@ -1,0 +1,64 @@
+---
+title: "Untitled"
+output: html_document
+date: "2025-03-26"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+data <- read.csv("Case 1 Data.csv", stringsAsFactors = FALSE)
+data <- read.csv("Case 1 Data.csv", skip = 6, header=TRUE)  # Skip the first 5 rows
+
+
+str(data)
+head(data)
+
+colnames(data) <- make.names(colnames(data), unique = TRUE)
+
+head(data)
+
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+
+colnames(data)
+colnames(data) <- make.names(colnames(data), unique = TRUE)
+colnames(data)
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r Y, echo=FALSE}
+
+# Extracting the relevant columns
+data <- data[c("ID", "Title", "Location", "Created", "Ended", "Impact", 
+                           "Coordinates", "Traffic.conditions", "Diversions", 
+                           "Public.transport", "Expected.delay", "Traffic.arrangement")]
+
+# Display the first few rows to ensure the data is correctly extracted
+colnames(data)
+
+# Optionally, save the extracted data to a new CSV file
+# write.csv(selected_columns, "extracted_road_closures.csv", row.names = FALSE)
+
+```
+```{r x, echo=FALSE}
+
+head(data)
+
+```

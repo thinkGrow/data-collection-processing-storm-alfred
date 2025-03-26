@@ -5,3 +5,7 @@ data <- read.csv("Case 1 Data.csv", skip = 6, header=TRUE)  # Skip the first 5 r
 str(data)
 head(data)
 
+colnames(data) <- make.names(colnames(data), unique = TRUE)
+
+head(data)
+
