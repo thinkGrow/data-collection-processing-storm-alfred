@@ -18,6 +18,50 @@ When you click the **Knit** button a document will be generated that includes bo
 data <- read.csv("Case 1 Data.csv", stringsAsFactors = FALSE)
 data <- read.csv("Case 1 Data.csv", skip = 6, header=TRUE)  # Skip the first 5 rows
 
+# Add row numbers to the data
+data$RowNumber <- 1:nrow(data)
+
+# Replace "-" with NA in the "Created" column
+data$Created[data$Created == "-"] <- NA
+
+# Replace missing values in the "Created" column with the "Updated" column where necessary
+data$Created[is.na(data$Created) | data$Created == ""] <- data$Updated[is.na(data$Created) | data$Created == ""]
+
+# Optionally, remove rows where both "Created" and "Updated" are empty (if you need)
+data <- data[!(is.na(data$Created) | data$Created == ""), ]
+
+# Write the cleaned data to a CSV file
+write.csv(data, "cleaned_data_with_filled_created.csv", row.names = FALSE)
+
+# Extracting the relevant columns
+data <- data[c("RowNumber", "ID", "Title", "Location", "Created", "Ended", "Impact", 
+                           "Coordinates", "Traffic.conditions", "Diversions", 
+                           "Public.transport", "Expected.delay", "Traffic.arrangement")]
+
+# Display the first few rows to ensure the data is correctly extracted
+colnames(data)
+
+# Optionally, save the extracted data to a new CSV file
+write.csv(data, "selected_column_data.csv", row.names = FALSE)
+
+# Remove rows with any NA values in the selected columns
+data <- na.omit(data)
+
+# Remove rows where the ID column has a "-" sign
+data <- data[data$ID != "-", ]
+
+# Write the cleaned data to a CSV file
+write.csv(data, "cleaned_data_without_dash.csv", row.names = FALSE)
+
+# Write the cleaned data to a CSV file
+write.csv(data, "cleaned_data.csv", row.names = FALSE)
+
+# Reorder the columns so that RowNumber is the first column
+data <- data[, c("RowNumber", setdiff(names(data), "RowNumber"))]
+
+
+write.csv(data, "Case 1 Data with ID.csv", row.names = FALSE)
+
 
 str(data)
 head(data)
@@ -26,39 +70,128 @@ colnames(data) <- make.names(colnames(data), unique = TRUE)
 
 head(data)
 
+# Print the first few rows of the data with RowNumber as the first column
+head(data)
+```
+```{r echo=FALSE}
 
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
+```{r echo=TRUE}
 
-```{r pressure, echo=FALSE}
-
-colnames(data)
-colnames(data) <- make.names(colnames(data), unique = TRUE)
-colnames(data)
-
+head(data)
+nrow(data)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r seperate date, echo=TRUE}
+# Load required library
+library(lubridate)
 
-```{r Y, echo=FALSE}
+# Sample data (Replace this with your actual dataset)
+
+# Clean the "Created" column by stripping leading/trailing whitespace
+data$Created <- trimws(data$Created)
+
+# Convert "Created" column to Date-Time format
+data$Created <- parse_date_time(data$Created, orders = c("a d b Y I:Mp"), tz = "Australia/Sydney")
+
+# Extract Date Components
+data$Day <- weekdays(data$Created)  # Extract day of the week
+data$Date <- day(data$Created)      # Extract numeric date
+data$Month <- month(data$Created, label = TRUE, abbr = FALSE)  # Full month name
+data$Year <- year(data$Created)     # Extract year
+data$Time <- format(data$Created, "%I:%M %p")  # Extract time in 12-hour format with AM/PM
+
 
 # Extracting the relevant columns
-data <- data[c("ID", "Title", "Location", "Created", "Ended", "Impact", 
+data <- data[c("RowNumber", "ID", "Title", "Location", "Created", "Day", "Date", "Month", "Year", "Time", "Ended", "Impact", 
                            "Coordinates", "Traffic.conditions", "Diversions", 
                            "Public.transport", "Expected.delay", "Traffic.arrangement")]
 
-# Display the first few rows to ensure the data is correctly extracted
-colnames(data)
 
-# Optionally, save the extracted data to a new CSV file
-# write.csv(selected_columns, "extracted_road_closures.csv", row.names = FALSE)
+# Print the updated dataset
+write.csv(data, "formatted_date_data_7.csv", row.names = FALSE)
+
+
+nrow(data)
 
 ```
-```{r x, echo=FALSE}
 
+```{r check, echo=FALSE}
+# Check the class of the Created column
+class(data$Created)
+# Check the time zone of the 'Created' column
+attributes(data$Created)$tzone
+
+
+```
+
+```{r}
+# Filter the data to keep only rows where the "Year" is 2025
+data <- data[data$Year == 2025, ]
+
+# Write the filtered data to a CSV file
+write.csv(data, "data_2025.csv", row.names = FALSE)
+
+# Print the first few rows of the filtered data
+head(data)
+```
+```{r}
+# Ensure the "Created" column is in Date format
+data$Created <- as.POSIXct(data$Created, format = "%Y-%m-%d %H:%M:%S")
+
+# Define the date range
+start_date <- as.POSIXct("2025-02-20 00:00:00", format = "%Y-%m-%d %H:%M:%S")
+end_date <- as.POSIXct("2025-03-10 23:59:59", format = "%Y-%m-%d %H:%M:%S")
+
+# Filter the data to keep rows within the date range
+data <- data[data$Created >= start_date & data$Created <= end_date, ]
+
+write.csv(data, "data_range.csv", row.names = FALSE)
+
+```
+
+
+```{r removal of empty columns, echo=FALSE}
+# Remove the specified columns
+data <- subset(data, select = -c(Public.transport, Expected.delay, Traffic.arrangement))
+
+# Save the updated data
+write.csv(data, "removed_empty_columns.csv", row.names = FALSE)
+
+# Print the first few rows to verify
 head(data)
 
 ```
+
+```{r}
+# Ensure "Created" is in proper Date-Time format
+data$Created <- as.POSIXct(data$Created, format="%Y-%m-%d %H:%M:%S", tz="Australia/Sydney")
+
+# Sort data in ascending order by "Created" column
+data <- data[order(data$Created), ]
+
+# Save the sorted dataset
+write.csv(data, "sorted_data_date.csv", row.names = FALSE)
+
+# Print the first few rows to verify
+head(data)
+
+```
+```{r}
+# Remove rows that contain specific terms in the "Title" column
+data <- data[!grepl("CRASH|SCHEDULED ROADWORK|BREAKDOWN|FERRY OUT OF SERVICE High tide|HAZARD Animal|CHANGED TRAFFIC CONDITIONS", data$Title), ]
+
+# Save the sorted dataset
+write.csv(data, "unrelated_incident_removed.csv", row.names = FALSE)
+```
+
+```{r}
+# Remove the columns 'traffic conditions' and 'diversion' from the dataset
+data <- data[, !(names(data) %in% c("Traffic.conditions", "Diversions"))]
+
+# Save the sorted dataset
+write.csv(data, "remove_further_empty_columns.csv", row.names = FALSE)
+```
+
